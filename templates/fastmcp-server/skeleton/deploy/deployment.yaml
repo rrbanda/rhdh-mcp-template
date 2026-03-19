@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${{ values.name }}
+  namespace: ${{ values.namespace }}
+  labels:
+    app: ${{ values.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${{ values.name }}
+  template:
+    metadata:
+      labels:
+        app: ${{ values.name }}
+    spec:
+      containers:
+        - name: mcp-server
+          image: image-registry.openshift-image-registry.svc:5000/${{ values.namespace }}/${{ values.name }}:latest
+          ports:
+            - containerPort: ${{ values.port }}
+          env:
+            - name: API_BASE_URL
+              value: ${{ values.apiBaseUrl }}
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${{ values.name }}
+  namespace: ${{ values.namespace }}
+  labels:
+    app: ${{ values.name }}
+spec:
+  selector:
+    app: ${{ values.name }}
+  ports:
+    - port: ${{ values.port }}
+      targetPort: ${{ values.port }}
+      protocol: TCP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: ${{ values.name }}
+  namespace: ${{ values.namespace }}
+  labels:
+    app: ${{ values.name }}
+spec:
+  to:
+    kind: Service
+    name: ${{ values.name }}
+  port:
+    targetPort: ${{ values.port }}
+  tls:
+    termination: edge

@@ -1,0 +1,7 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: mcp-server-templates
+spec:
+  targets:
+    - ./templates/**/template.yaml

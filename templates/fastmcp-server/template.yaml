@@ -1,0 +1,114 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-fastmcp-server
+  title: FastMCP Server
+  description: >
+    Scaffold a FastMCP MCP server that wraps a REST API as a set of MCP tools.
+    Generates Python code, Dockerfile, OpenShift deployment manifests, and a
+    GitHub Actions CI pipeline.
+  tags:
+    - mcp
+    - python
+    - fastmcp
+    - openshift
+spec:
+  owner: platform-engineering
+  type: service
+
+  parameters:
+    - title: Service Details
+      required:
+        - name
+      properties:
+        name:
+          title: Service Name
+          type: string
+          description: Unique name for the MCP server (kebab-case).
+          maxLength: 50
+          pattern: '^([a-zA-Z][a-zA-Z0-9]*)(-[a-zA-Z0-9]+)*$'
+          ui:autofocus: true
+        description:
+          title: Description
+          type: string
+          description: A short description of what this MCP server does.
+          default: A FastMCP server that wraps a REST API as MCP tools.
+        owner:
+          title: Owner
+          type: string
+          description: The Backstage entity that owns this component.
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: [Group, User]
+
+    - title: API Configuration
+      properties:
+        apiBaseUrl:
+          title: API Base URL
+          type: string
+          description: Base URL of the REST API this MCP server wraps.
+          default: http://localhost:8080
+        port:
+          title: Server Port
+          type: integer
+          description: Port the MCP server listens on.
+          default: 8000
+
+    - title: Deployment
+      required:
+        - repoUrl
+      properties:
+        namespace:
+          title: OpenShift Namespace
+          type: string
+          description: Target namespace for OpenShift deployment manifests.
+          default: mcp-servers
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+
+  steps:
+    - id: generateSource
+      name: Generate MCP Server Codebase
+      action: fetch:template
+      input:
+        url: ./skeleton
+        targetPath: ./source
+        values:
+          name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+          apiBaseUrl: ${{ parameters.apiBaseUrl }}
+          port: ${{ parameters.port }}
+          namespace: ${{ parameters.namespace }}
+          destination: ${{ parameters.repoUrl | parseRepoUrl }}
+
+    - id: publishSource
+      name: Create GitHub Repository
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: main
+        sourcePath: ./source
+        description: ${{ parameters.description }}
+
+    - id: registerCatalog
+      name: Register in Backstage Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publishSource.output.repoContentsUrl }}
+        catalogInfoPath: /catalog-info.yaml
+
+  output:
+    links:
+      - title: View Repository
+        url: ${{ steps.publishSource.output.remoteUrl }}
+      - title: View in Catalog
+        icon: catalog
+        entityRef: ${{ steps.registerCatalog.output.entityRef }}

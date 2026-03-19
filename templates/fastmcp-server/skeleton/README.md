@@ -39,45 +39,24 @@ docker build -t ${{ values.name }} .
 docker run -p ${{ values.port }}:${{ values.port }} ${{ values.name }}
 ```
 
-## CI/CD with Tekton on OpenShift
+## CI/CD with Pipelines as Code (Tekton)
 
-This project includes a Tekton Pipeline that automates building the container
-image and deploying it to OpenShift.
+This project uses **Pipelines as Code** (PAC) for fully automated CI/CD on
+OpenShift. No manual setup is required -- every push to `main` automatically
+builds the container image and deploys to OpenShift.
 
-### First-Time Setup
+The pipeline definition lives in `.tekton/push.yaml` and performs:
 
-Run the setup script to create the namespace and apply Tekton resources:
+1. **Clone** -- fetches the repository source
+2. **Build** -- builds the container image with buildah and pushes to the
+   OpenShift internal registry
+3. **Deploy** -- applies the deployment manifests and rolls out the new version
 
-```bash
-cd tekton
-./setup.sh ${{ values.namespace }}
-```
+### How It Works
 
-This provisions:
-
-- **Pipeline** (`${{ values.name }}-ci-cd`) -- clones the repo, builds with
-  buildah, pushes to the internal registry, and deploys to OpenShift.
-- **EventListener** -- receives GitHub webhook events and triggers pipeline runs
-  automatically on push to `main`.
-- **TriggerBinding / TriggerTemplate** -- maps GitHub push payloads to pipeline
-  parameters.
-
-### Manual Pipeline Run
-
-```bash
-oc create -f tekton/pipelinerun.yaml
-```
-
-### Automatic Triggers (GitHub Webhook)
-
-After running `setup.sh`, configure a GitHub webhook:
-
-1. Go to **Settings > Webhooks** in your GitHub repository.
-2. Set **Payload URL** to the EventListener route printed by `setup.sh`.
-3. Set **Content type** to `application/json`.
-4. Select **Just the push event**.
-
-Every push to `main` will automatically build and deploy.
+A GitHub webhook (created automatically by the RHDH template) sends push events
+to the Pipelines as Code controller on OpenShift. PAC reads `.tekton/push.yaml`
+from the repo and creates a PipelineRun automatically.
 
 ### Manual Deployment (without pipeline)
 

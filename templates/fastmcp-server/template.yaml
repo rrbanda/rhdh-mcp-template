@@ -101,6 +101,17 @@ spec:
         sourcePath: ./source
         description: ${{ parameters.description }}
 
+    - id: createWebhook
+      name: Configure CI/CD Webhook
+      action: github:webhook
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        webhookUrl: https://el-fastmcp-listener-mcp-servers.apps.ocp.v7hjl.sandbox2288.opentlc.com
+        contentType: json
+        events:
+          - push
+        webhookSecret: pac-webhook-shared-secret
+
     - id: registerCatalog
       name: Register in Backstage Catalog
       action: catalog:register

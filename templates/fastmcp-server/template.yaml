@@ -71,6 +71,8 @@ spec:
           ui:options:
             allowedHosts:
               - github.com
+            allowedOwners:
+              - rrbanda
 
   steps:
     - id: generateSource

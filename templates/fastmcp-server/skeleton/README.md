@@ -39,9 +39,49 @@ docker build -t ${{ values.name }} .
 docker run -p ${{ values.port }}:${{ values.port }} ${{ values.name }}
 ```
 
-## OpenShift Deployment
+## CI/CD with Tekton on OpenShift
 
-Apply the included manifests to deploy on OpenShift:
+This project includes a Tekton Pipeline that automates building the container
+image and deploying it to OpenShift.
+
+### First-Time Setup
+
+Run the setup script to create the namespace and apply Tekton resources:
+
+```bash
+cd tekton
+./setup.sh ${{ values.namespace }}
+```
+
+This provisions:
+
+- **Pipeline** (`${{ values.name }}-ci-cd`) -- clones the repo, builds with
+  buildah, pushes to the internal registry, and deploys to OpenShift.
+- **EventListener** -- receives GitHub webhook events and triggers pipeline runs
+  automatically on push to `main`.
+- **TriggerBinding / TriggerTemplate** -- maps GitHub push payloads to pipeline
+  parameters.
+
+### Manual Pipeline Run
+
+```bash
+oc create -f tekton/pipelinerun.yaml
+```
+
+### Automatic Triggers (GitHub Webhook)
+
+After running `setup.sh`, configure a GitHub webhook:
+
+1. Go to **Settings > Webhooks** in your GitHub repository.
+2. Set **Payload URL** to the EventListener route printed by `setup.sh`.
+3. Set **Content type** to `application/json`.
+4. Select **Just the push event**.
+
+Every push to `main` will automatically build and deploy.
+
+### Manual Deployment (without pipeline)
+
+Apply the included manifests directly:
 
 ```bash
 oc apply -f deploy/deployment.yaml

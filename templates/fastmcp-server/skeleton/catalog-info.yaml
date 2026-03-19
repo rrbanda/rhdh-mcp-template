@@ -5,6 +5,8 @@ metadata:
   description: ${{ values.description }}
   annotations:
     github.com/project-slug: ${{ values.destination.owner + "/" + values.destination.repo }}
+    tektonci/build-namespace: ${{ values.namespace }}
+    janus-idp.io/tekton: ${{ values.name }}-ci-cd
 spec:
   type: service
   lifecycle: dev

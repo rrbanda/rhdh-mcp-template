@@ -6,12 +6,14 @@ metadata:
   description: >
     Scaffold a FastMCP MCP server that wraps a REST API as a set of MCP tools.
     Generates Python code, Dockerfile, OpenShift deployment manifests, and a
-    GitHub Actions CI pipeline.
+    Tekton CI/CD pipeline for automated build and deployment on OpenShift.
   tags:
     - mcp
     - python
     - fastmcp
     - openshift
+    - tekton
+    - pipelines
 spec:
   owner: platform-engineering
   type: service

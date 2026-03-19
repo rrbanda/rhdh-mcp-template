@@ -36,11 +36,11 @@ spec:
           - name: namespace
             value: openshift-pipelines
       params:
-        - name: url
+        - name: URL
           value: $(params.git-url)
-        - name: revision
+        - name: REVISION
           value: $(params.git-revision)
-        - name: deleteExisting
+        - name: DELETE_EXISTING
           value: "true"
       workspaces:
         - name: output
@@ -61,7 +61,7 @@ spec:
       params:
         - name: IMAGE
           value: $(params.image-name)
-        - name: TLSVERIFY
+        - name: TLS_VERIFY
           value: "false"
       workspaces:
         - name: source
@@ -86,5 +86,5 @@ spec:
             oc rollout restart deployment/${{ values.name }} -n $(params.deploy-namespace)
             oc rollout status deployment/${{ values.name }} -n $(params.deploy-namespace) --timeout=120s
       workspaces:
-        - name: manifest-dir
+        - name: manifest_dir
           workspace: shared-workspace

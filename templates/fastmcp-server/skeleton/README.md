@@ -39,13 +39,13 @@ docker build -t ${{ values.name }} .
 docker run -p ${{ values.port }}:${{ values.port }} ${{ values.name }}
 ```
 
-## CI/CD with Pipelines as Code (Tekton)
+## CI/CD (Tekton)
 
-This project uses **Pipelines as Code** (PAC) for fully automated CI/CD on
-OpenShift. No manual setup is required -- every push to `main` automatically
-builds the container image and deploys to OpenShift.
+Every push to `main` automatically builds the container image and deploys to
+OpenShift. No pipeline files are stored in this repo -- CI/CD is handled by a
+shared Tekton Pipeline pre-provisioned on the cluster.
 
-The pipeline definition lives in `.tekton/push.yaml` and performs:
+The shared pipeline (`fastmcp-ci-cd`) performs:
 
 1. **Clone** -- fetches the repository source
 2. **Build** -- builds the container image with buildah and pushes to the
@@ -55,8 +55,9 @@ The pipeline definition lives in `.tekton/push.yaml` and performs:
 ### How It Works
 
 A GitHub webhook (created automatically by the RHDH template) sends push events
-to the Pipelines as Code controller on OpenShift. PAC reads `.tekton/push.yaml`
-from the repo and creates a PipelineRun automatically.
+to a shared Tekton EventListener on OpenShift. The EventListener extracts the
+repo URL, revision, and name from the webhook payload and creates a PipelineRun
+against the shared `fastmcp-ci-cd` Pipeline.
 
 ### Manual Deployment (without pipeline)
 

@@ -6,7 +6,7 @@ metadata:
   annotations:
     github.com/project-slug: ${{ values.destination.owner + "/" + values.destination.repo }}
     tektonci/build-namespace: ${{ values.namespace }}
-    janus-idp.io/tekton: ${{ values.name }}-ci-cd
+    janus-idp.io/tekton: fastmcp-ci-cd
 spec:
   type: service
   lifecycle: dev

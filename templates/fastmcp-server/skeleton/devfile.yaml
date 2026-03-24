@@ -1,12 +1,15 @@
-schemaVersion: 2.2.0
+schemaVersion: 2.2.2
 metadata:
   name: ${{ values.name }}
   description: Dev Spaces workspace for ${{ values.name }}
 components:
   - name: dev-tools
     container:
-      image: registry.redhat.io/devspaces/udi-rhel8:latest
-      memoryLimit: 2Gi
+      image: quay.io/rbrhssa/mcp-skills:latest
+      memoryLimit: 4Gi
+      memoryRequest: 1Gi
+      cpuLimit: "2"
+      cpuRequest: 500m
       mountSources: true
       endpoints:
         - name: mcp-server
@@ -16,6 +19,18 @@ components:
       env:
         - name: API_BASE_URL
           value: ${{ values.apiBaseUrl }}
+        - name: GOOSE_PROVIDER
+          value: openai
+        - name: GOOSE_MODEL
+          value: vllm-inference/gpt-oss-120b
+        - name: OPENAI_HOST
+          value: https://llamastack-llamastack.apps.ocp.v7hjl.sandbox2288.opentlc.com
+        - name: OPENAI_BASE_PATH
+          value: v1/chat/completions
+        - name: OPENAI_API_KEY
+          value: dummy
+        - name: XDG_STATE_HOME
+          value: /tmp/.local/state
 commands:
   - id: install-deps
     exec:
@@ -33,3 +48,19 @@ commands:
       group:
         kind: run
         isDefault: true
+  - id: install-goose-extension
+    exec:
+      component: dev-tools
+      commandLine: >-
+        /checode/checode-linux-libc/bin/remote-cli/code
+        --install-extension /opt/extensions/vscode-goose.vsix 2>/dev/null ||
+        echo "Goose extension install skipped"
+      workingDir: ${PROJECT_SOURCE}
+  - id: goose-test
+    exec:
+      component: dev-tools
+      commandLine: goose run --no-session --text "Hello, what model are you?"
+      workingDir: ${PROJECT_SOURCE}
+events:
+  postStart:
+    - install-goose-extension

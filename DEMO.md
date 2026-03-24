@@ -201,30 +201,23 @@ Wait for response. Show the generated code briefly.
                                  │
                                  ▼
 ╔═════════════════════════════════════════════════════════════════════╗
-║              APPLICATION  RUNTIME  LAYER                           ║
+║              OPENSHIFT  CONTAINER  PLATFORM        [AIR-GAPPED]    ║
 ║                                                                     ║
-║   OpenShift Container Platform                                      ║
+║   Application Workloads                                             ║
 ║   ┌─────────────────────────────────────────────────────────┐      ║
-║   │  MCP Server (Deployment + Service + Route)              │      ║
-║   │  ┌────────────────────────────────────────────────────┐  │      ║
-║   │  │  FastMCP Python Server — exposes API tools via MCP │  │      ║
-║   │  └────────────────────────────────────────────────────┘  │      ║
+║   │  FastMCP Python Server · Deployment · Service · Route   │      ║
 ║   └─────────────────────────────────────────────────────────┘      ║
-╚═════════════════════════════════════════════════════════════════════╝
-                                 │
-                                 ▼
-╔═════════════════════════════════════════════════════════════════════╗
-║              AI  SERVICES  LAYER  (on-prem)                        ║
 ║                                                                     ║
-║   Llama Stack (Unified AI Runtime)                                  ║
-║   ┌─────────────────────────────────────────────────────────┐      ║
-║   │  OpenAI-compatible API gateway                          │      ║
-║   └────────────────────────┬────────────────────────────────┘      ║
-║                            │                                        ║
-║   OpenShift AI (RHOAI)     ▼                                        ║
-║   ┌─────────────────────────────────────────────────────────┐      ║
-║   │  vLLM  ·  gpt-oss-120b  ·  GPU-accelerated inference   │      ║
-║   └─────────────────────────────────────────────────────────┘      ║
+║   ─ ─ ─ ─  AI Services (operators on same cluster)  ─ ─ ─ ─       ║
+║                                                                     ║
+║   Llama Stack                    OpenShift AI (RHOAI) + vLLM       ║
+║   ┌─────────────────────┐        ┌─────────────────────────┐       ║
+║   │  Unified AI Runtime  │───────→│  gpt-oss-120b           │       ║
+║   │  OpenAI-compatible   │        │  GPU-accelerated        │       ║
+║   │  API gateway         │        │  inference              │       ║
+║   └─────────────────────┘        └─────────────────────────┘       ║
+║                                                                     ║
+║   ▲ All services run on the same OpenShift cluster ▲                ║
 ╚═════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -234,5 +227,4 @@ Wait for response. Show the generated code briefly.
 |-------|-----------|---------|
 | **Developer Experience** | Developer Hub, Dev Spaces, Goose Agent | Self-service scaffolding, cloud IDE, AI-assisted coding |
 | **CI/CD Automation** | Tekton, ArgoCD, GitHub repos | Automated build, GitOps deployment, source of truth |
-| **Application Runtime** | OpenShift, MCP Server | Run containerized MCP services at scale |
-| **AI Services** | Llama Stack, vLLM on RHOAI | On-prem LLM inference — code never leaves the network |
+| **OpenShift Platform** | App workloads, RHOAI + vLLM, Llama Stack | Everything runs on one cluster — code never leaves the network |

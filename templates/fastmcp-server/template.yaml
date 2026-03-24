@@ -105,6 +105,7 @@ spec:
         defaultBranch: main
         sourcePath: ./source
         description: ${{ parameters.description }}
+        repoVisibility: public
 
     - id: generateGitOps
       name: Generate GitOps Manifests
@@ -129,6 +130,7 @@ spec:
         defaultBranch: main
         sourcePath: ./gitops
         description: "GitOps manifests for ${{ parameters.name }}"
+        repoVisibility: public
 
     - id: createWebhook
       name: Configure CI Webhook

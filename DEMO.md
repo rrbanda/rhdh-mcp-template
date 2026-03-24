@@ -4,19 +4,23 @@
 
 ---
 
-## Opening — The Problem (30 seconds)
+## Opening — The Problem & The Platform (45 seconds)
 
 > "Developers today want to expose their APIs as tools that AI agents can use — that's what MCP servers do. But setting up the infrastructure — repos, CI/CD pipelines, GitOps, cloud IDEs — takes days of boilerplate. And when you add AI coding assistants, most organizations can't use cloud-hosted ones because the code can't leave the network.
 >
-> We solved both problems. Let me show you how a developer goes from zero to a running MCP server with an on-prem AI coding agent — in minutes, not days."
+> We solved both problems with **Red Hat Developer Hub** — an enterprise-grade internal developer portal built on Backstage. It gives platform teams a single pane of glass where developers discover services, monitor CI/CD, and — most importantly — use **Software Templates** to scaffold new projects in one click.
+>
+> A Software Template is a golden-path blueprint. The platform team defines it once — the repos, the pipelines, the deployment strategy, the IDE setup — and every developer on the team gets that exact same production-ready starting point. No tribal knowledge, no copy-pasting from wikis, no tickets to DevOps.
+>
+> Let me show you."
 
 ---
 
-## Act 1 — The Template (1.5 minutes)
+## Act 1 — The Template in Action (1.5 minutes)
 
 ### TELL (15 seconds)
 
-> "Everything starts in Red Hat Developer Hub — our internal developer portal. We've created a golden-path template that gives developers everything they need."
+> "Here in Developer Hub, under Create, we see our FastMCP Server template. This is what the platform team published — one template that gives developers everything they need to build and deploy an MCP server."
 
 ### SHOW
 
@@ -157,40 +161,78 @@ Wait for response. Show the generated code briefly.
 
 ---
 
-## Architecture
+## Architecture — Layer Cake (for slides)
 
 ```
-Developer
-    │
-    ▼
-┌──────────────────────────────────────────────────────────────┐
-│  Red Hat Developer Hub (Backstage)                           │
-│  ┌────────────────────┐                                      │
-│  │  FastMCP Template   │──→ 2 GitHub repos (app + gitops)    │
-│  │  (one-click)        │──→ Tekton CI webhook                │
-│  └────────────────────┘──→ ArgoCD Application                │
-│                           ──→ Catalog registration            │
-└──────────────────────────────────────────────────────────────┘
-    │                                          │
-    ▼                                          ▼
-┌──────────────┐    git push     ┌─────────────────────────────┐
-│  Dev Spaces   │ ──────────────→│  Tekton CI Pipeline          │
-│  (cloud IDE)  │                │  clone → build → push image  │
-│               │                │  → update GitOps repo         │
-│  ┌──────────┐ │                └──────────────┬──────────────┘
-│  │  Goose    │ │                               │
-│  │  Agent    │ │                               ▼
-│  └─────┬────┘ │                ┌─────────────────────────────┐
-│        │      │                │  ArgoCD (GitOps CD)          │
-└────────┼──────┘                │  watches gitops repo          │
-         │                       │  → syncs to OpenShift         │
-         ▼                       └─────────────────────────────┘
-┌─────────────────────┐
-│  Llama Stack         │
-│  ┌─────────────────┐ │
-│  │ vLLM on RHOAI   │ │
-│  │ gpt-oss-120b    │ │
-│  │ (on-prem LLM)   │ │
-│  └─────────────────┘ │
-└─────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                        D E V E L O P E R                            │
+└─────────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+╔═════════════════════════════════════════════════════════════════════╗
+║              DEVELOPER EXPERIENCE LAYER                            ║
+║                                                                     ║
+║   Red Hat Developer Hub          OpenShift Dev Spaces               ║
+║   ┌─────────────────────┐        ┌─────────────────────────┐       ║
+║   │ Software Templates  │        │ Cloud IDE (VS Code)     │       ║
+║   │ Service Catalog     │        │ Goose AI Agent          │       ║
+║   │ CI/CD Visibility    │        │ Agent Skills & Recipes  │       ║
+║   │ Topology View       │        │ .goosehints Context     │       ║
+║   └─────────────────────┘        └─────────────────────────┘       ║
+╚═════════════════════════════════════════════════════════════════════╝
+                                 │
+                                 ▼
+╔═════════════════════════════════════════════════════════════════════╗
+║              CI / CD  AUTOMATION  LAYER                            ║
+║                                                                     ║
+║   Tekton (CI)                    ArgoCD (CD)                        ║
+║   ┌─────────────────────┐        ┌─────────────────────────┐       ║
+║   │ Pipeline: clone →   │        │ GitOps: watches gitops  │       ║
+║   │ build image →       │───────→│ repo → auto-syncs to    │       ║
+║   │ push → update gitops│        │ OpenShift cluster        │       ║
+║   └─────────────────────┘        └─────────────────────────┘       ║
+║                                                                     ║
+║   GitHub (Source of Truth)                                          ║
+║   ┌──────────────────┐  ┌──────────────────────┐                   ║
+║   │ App Repo          │  │ GitOps Repo           │                  ║
+║   │ (code + devfile)  │  │ (k8s manifests)       │                  ║
+║   └──────────────────┘  └──────────────────────┘                   ║
+╚═════════════════════════════════════════════════════════════════════╝
+                                 │
+                                 ▼
+╔═════════════════════════════════════════════════════════════════════╗
+║              APPLICATION  RUNTIME  LAYER                           ║
+║                                                                     ║
+║   OpenShift Container Platform                                      ║
+║   ┌─────────────────────────────────────────────────────────┐      ║
+║   │  MCP Server (Deployment + Service + Route)              │      ║
+║   │  ┌────────────────────────────────────────────────────┐  │      ║
+║   │  │  FastMCP Python Server — exposes API tools via MCP │  │      ║
+║   │  └────────────────────────────────────────────────────┘  │      ║
+║   └─────────────────────────────────────────────────────────┘      ║
+╚═════════════════════════════════════════════════════════════════════╝
+                                 │
+                                 ▼
+╔═════════════════════════════════════════════════════════════════════╗
+║              AI  SERVICES  LAYER  (on-prem)                        ║
+║                                                                     ║
+║   Llama Stack (Unified AI Runtime)                                  ║
+║   ┌─────────────────────────────────────────────────────────┐      ║
+║   │  OpenAI-compatible API gateway                          │      ║
+║   └────────────────────────┬────────────────────────────────┘      ║
+║                            │                                        ║
+║   OpenShift AI (RHOAI)     ▼                                        ║
+║   ┌─────────────────────────────────────────────────────────┐      ║
+║   │  vLLM  ·  gpt-oss-120b  ·  GPU-accelerated inference   │      ║
+║   └─────────────────────────────────────────────────────────┘      ║
+╚═════════════════════════════════════════════════════════════════════╝
 ```
+
+### Layer Summary (for slide bullets)
+
+| Layer | Components | Purpose |
+|-------|-----------|---------|
+| **Developer Experience** | Developer Hub, Dev Spaces, Goose Agent | Self-service scaffolding, cloud IDE, AI-assisted coding |
+| **CI/CD Automation** | Tekton, ArgoCD, GitHub repos | Automated build, GitOps deployment, source of truth |
+| **Application Runtime** | OpenShift, MCP Server | Run containerized MCP services at scale |
+| **AI Services** | Llama Stack, vLLM on RHOAI | On-prem LLM inference — code never leaves the network |

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture — Layer Cake</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #F5F6F8;
+    font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 32px;
+  }
+  .slide {
+    width: 1100px;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 4px 24px rgba(0,20,50,0.12);
+    overflow: hidden;
+  }
+
+  /* Title */
+  .title-bar {
+    background: linear-gradient(180deg, #003B70, #002A52);
+    padding: 18px 40px;
+  }
+  .title-bar h1 {
+    color: #fff;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .red-stripe { height: 4px; background: #E31837; }
+
+  /* Developer banner */
+  .dev-banner {
+    margin: 20px 40px 0;
+    background: linear-gradient(180deg, #003B70, #002A52);
+    border-radius: 6px;
+    text-align: center;
+    padding: 12px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 3px;
+  }
+
+  /* Arrows */
+  .arrow {
+    text-align: center;
+    padding: 6px 0;
+    color: #003B70;
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  /* Layers */
+  .layer {
+    margin: 0 40px 0;
+    border-radius: 8px;
+    border: 1.5px solid;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,20,50,0.08);
+  }
+  .layer-header {
+    padding: 8px 20px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .layer-body {
+    display: flex;
+    gap: 20px;
+    padding: 16px 20px 20px;
+    background: #fff;
+  }
+
+  /* Cards inside layers */
+  .card {
+    flex: 1;
+    border-radius: 6px;
+    padding: 14px 18px;
+    border: 1px solid;
+  }
+  .card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #003B70;
+    margin-bottom: 4px;
+  }
+  .card .accent-line {
+    height: 2px;
+    width: 60%;
+    background: #E31837;
+    margin-bottom: 10px;
+    border-radius: 1px;
+  }
+  .card p {
+    font-size: 12px;
+    color: #3C4858;
+    line-height: 1.7;
+  }
+
+  /* Layer-specific colors */
+  .layer-dx         { border-color: #0072CE; }
+  .layer-dx .layer-header { background: linear-gradient(180deg, #0072CE, #005EA6); }
+  .layer-dx .card   { background: #EBF3FA; border-color: #0072CE; }
+  .arrow-dx         { color: #0072CE; }
+
+  .layer-cicd       { border-color: #00A1DE; }
+  .layer-cicd .layer-header { background: linear-gradient(180deg, #00A1DE, #0088C6); }
+  .layer-cicd .card { background: #E8F6FB; border-color: #00A1DE; }
+  .arrow-cicd       { color: #00A1DE; }
+
+  .layer-runtime    { border-color: #007A87; }
+  .layer-runtime .layer-header { background: linear-gradient(180deg, #007A87, #00626E); }
+  .layer-runtime .card { background: #E6F2F3; border-color: #007A87; }
+  .arrow-runtime    { color: #007A87; }
+
+  .layer-ai         { border-color: #003B70; }
+  .layer-ai .layer-header { background: linear-gradient(180deg, #003B70, #002A52); }
+  .layer-ai .card   { background: #EBF0F5; border-color: #003B70; }
+
+  .badge {
+    background: #E31837;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+  }
+
+  /* 3-col layout for CI/CD */
+  .layer-body.three-col { }
+  .layer-body.three-col .card:nth-child(1) { flex: 1; }
+  .layer-body.three-col .card:nth-child(2) { flex: 1; }
+  .layer-body.three-col .card:nth-child(3) { flex: 1; }
+
+  /* Full-width card */
+  .card.full { flex: 1 1 100%; }
+
+  /* Flow arrow between cards */
+  .flow-arrow {
+    display: flex;
+    align-items: center;
+    color: #003B70;
+    font-size: 20px;
+    font-weight: 700;
+    padding: 0 2px;
+    flex-shrink: 0;
+  }
+
+  /* Footer */
+  .footer {
+    background: linear-gradient(180deg, #003B70, #002A52);
+    padding: 8px 40px;
+    margin-top: 20px;
+    text-align: center;
+  }
+  .footer span {
+    color: #8CB4D5;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="slide">
+
+  <!-- Title -->
+  <div class="title-bar">
+    <h1>Self-Service MCP Servers with AI-Powered Development</h1>
+  </div>
+  <div class="red-stripe"></div>
+
+  <!-- Developer -->
+  <div class="dev-banner">D E V E L O P E R</div>
+  <div class="arrow">▼</div>
+
+  <!-- Layer 1: Developer Experience -->
+  <div class="layer layer-dx">
+    <div class="layer-header">DEVELOPER EXPERIENCE</div>
+    <div class="layer-body">
+      <div class="card">
+        <h3>Red Hat Developer Hub</h3>
+        <div class="accent-line"></div>
+        <p>
+          Software Templates — golden-path scaffolding<br>
+          Service Catalog — single pane of glass<br>
+          CI / CD / Topology — full pipeline visibility
+        </p>
+      </div>
+      <div class="card">
+        <h3>OpenShift Dev Spaces</h3>
+        <div class="accent-line"></div>
+        <p>
+          Cloud IDE — VS Code in the browser<br>
+          Goose AI Agent — on-prem coding assistant<br>
+          Agent Skills &amp; .goosehints — team recipes
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow arrow-dx">▼</div>
+
+  <!-- Layer 2: CI/CD Automation -->
+  <div class="layer layer-cicd">
+    <div class="layer-header">CI / CD  AUTOMATION</div>
+    <div class="layer-body three-col">
+      <div class="card">
+        <h3>Tekton (CI)</h3>
+        <div class="accent-line"></div>
+        <p>
+          clone → build image → push<br>
+          → update GitOps repo
+        </p>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="card">
+        <h3>ArgoCD (CD)</h3>
+        <div class="accent-line"></div>
+        <p>
+          GitOps — watches manifests repo<br>
+          auto-syncs to OpenShift cluster
+        </p>
+      </div>
+      <div class="card">
+        <h3>GitHub (Source of Truth)</h3>
+        <div class="accent-line"></div>
+        <p>
+          App Repo — code + devfile<br>
+          GitOps Repo — K8s manifests
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow arrow-cicd">▼</div>
+
+  <!-- Layer 3: Application Runtime -->
+  <div class="layer layer-runtime">
+    <div class="layer-header">APPLICATION RUNTIME</div>
+    <div class="layer-body">
+      <div class="card full">
+        <h3>OpenShift Container Platform</h3>
+        <div class="accent-line"></div>
+        <p>FastMCP Python Server &nbsp;·&nbsp; Deployment &nbsp;·&nbsp; Service &nbsp;·&nbsp; Route &nbsp;·&nbsp; Auto-scaled pods</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow arrow-runtime">▼</div>
+
+  <!-- Layer 4: AI Services -->
+  <div class="layer layer-ai">
+    <div class="layer-header">
+      <span>AI  SERVICES  ( ON-PREM )</span>
+      <span class="badge">AIR-GAPPED</span>
+    </div>
+    <div class="layer-body">
+      <div class="card">
+        <h3>Llama Stack</h3>
+        <div class="accent-line"></div>
+        <p>
+          Unified AI Runtime — OpenAI-compatible API<br>
+          Model routing, safety, observability
+        </p>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="card">
+        <h3>vLLM on OpenShift AI (RHOAI)</h3>
+        <div class="accent-line"></div>
+        <p>
+          gpt-oss-120B — GPU-accelerated inference<br>
+          Code never leaves the network
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span>Red Hat Developer Hub &nbsp;·&nbsp; OpenShift &nbsp;·&nbsp; Tekton &nbsp;·&nbsp; ArgoCD &nbsp;·&nbsp; Dev Spaces &nbsp;·&nbsp; Goose &nbsp;·&nbsp; Llama Stack &nbsp;·&nbsp; vLLM</span>
+  </div>
+
+</div>
+
+</body>
+</html>

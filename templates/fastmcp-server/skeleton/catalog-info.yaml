@@ -5,8 +5,10 @@ metadata:
   description: ${{ values.description }}
   annotations:
     github.com/project-slug: ${{ values.destination.owner + "/" + values.destination.repo }}
-    tektonci/build-namespace: ${{ values.namespace }}
-    janus-idp.io/tekton: fastmcp-ci-cd
+    backstage.io/kubernetes-namespace: ${{ values.namespace }}
+    backstage.io/kubernetes-id: ${{ values.name }}
+    backstage.io/kubernetes-label-selector: app=${{ values.name }}
+    janus-idp.io/tekton: ${{ values.name }}
 spec:
   type: service
   lifecycle: dev

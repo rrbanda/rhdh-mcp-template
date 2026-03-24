@@ -7,6 +7,8 @@ metadata:
     Scaffold a FastMCP MCP server that wraps a REST API as a set of MCP tools.
     Generates Python code, Dockerfile, OpenShift deployment manifests, and a
     Tekton CI/CD pipeline for automated build and deployment on OpenShift.
+  annotations:
+    backstage.io/kubernetes-id: create-fastmcp-server
   tags:
     - mcp
     - python

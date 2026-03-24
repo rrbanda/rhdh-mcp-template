@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: mcp-server
-          image: image-registry.openshift-image-registry.svc:5000/${{ values.namespace }}/${{ values.name }}:latest
+          image: image-registry.openshift-image-registry.svc:5000/${{ values.namespace }}/${{ values.destination.repo }}:latest
           ports:
             - containerPort: ${{ values.port }}
           env:

@@ -5,6 +5,13 @@ metadata:
   namespace: ${{ values.namespace }}
   labels:
     app: ${{ values.name }}
+    app.kubernetes.io/name: python
+    app.kubernetes.io/part-of: ${{ values.name }}
+    app.openshift.io/runtime: python
+    backstage.io/kubernetes-id: ${{ values.destination.repo }}
+  annotations:
+    app.openshift.io/vcs-uri: https://github.com/${{ values.destination.owner }}/${{ values.destination.repo }}
+    app.openshift.io/vcs-ref: main
 spec:
   replicas: 1
   selector:
@@ -14,6 +21,7 @@ spec:
     metadata:
       labels:
         app: ${{ values.name }}
+        backstage.io/kubernetes-id: ${{ values.destination.repo }}
     spec:
       containers:
         - name: mcp-server

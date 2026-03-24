@@ -9,7 +9,14 @@ metadata:
     backstage.io/kubernetes-id: ${{ values.name }}
     backstage.io/kubernetes-label-selector: backstage.io/kubernetes-id=${{ values.name }}
     janus-idp.io/tekton: ${{ values.name }}
+    argocd/app-name: ${{ values.name }}
+  links:
+    - url: https://devspaces.apps.ocp.v7hjl.sandbox2288.opentlc.com/#https://github.com/${{ values.destination.owner }}/${{ values.destination.repo }}
+      title: Open in Dev Spaces
+      icon: code
 spec:
   type: service
   lifecycle: dev
   owner: ${{ values.owner }}
+  dependsOn:
+    - resource:default/${{ values.name }}-gitops

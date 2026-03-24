@@ -1,0 +1,35 @@
+schemaVersion: 2.2.0
+metadata:
+  name: ${{ values.name }}
+  description: Dev Spaces workspace for ${{ values.name }}
+components:
+  - name: dev-tools
+    container:
+      image: registry.redhat.io/devspaces/udi-rhel8:latest
+      memoryLimit: 2Gi
+      mountSources: true
+      endpoints:
+        - name: mcp-server
+          targetPort: ${{ values.port }}
+          exposure: public
+          protocol: https
+      env:
+        - name: API_BASE_URL
+          value: ${{ values.apiBaseUrl }}
+commands:
+  - id: install-deps
+    exec:
+      component: dev-tools
+      commandLine: pip install -r requirements.txt
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: build
+        isDefault: true
+  - id: run-server
+    exec:
+      component: dev-tools
+      commandLine: python mcp_server.py
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: run
+        isDefault: true

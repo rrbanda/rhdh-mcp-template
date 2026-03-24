@@ -4,9 +4,10 @@ metadata:
   name: create-fastmcp-server
   title: FastMCP Server
   description: >
-    Scaffold a FastMCP MCP server that wraps a REST API as a set of MCP tools.
-    Generates Python code, Dockerfile, OpenShift deployment manifests, and a
-    Tekton CI/CD pipeline for automated build and deployment on OpenShift.
+    Scaffold a FastMCP MCP server with GitOps CI/CD.
+    Creates an application repo with Tekton CI pipeline and a separate
+    GitOps repo with Kustomize manifests managed by ArgoCD for deployment.
+    Includes Dev Spaces support for cloud-based development.
   annotations:
     backstage.io/kubernetes-id: create-fastmcp-server
   tags:
@@ -15,7 +16,9 @@ metadata:
     - fastmcp
     - openshift
     - tekton
-    - pipelines
+    - argocd
+    - gitops
+    - devspaces
 spec:
   owner: platform-engineering
   type: service
@@ -66,7 +69,7 @@ spec:
         namespace:
           title: OpenShift Namespace
           type: string
-          description: Target namespace for OpenShift deployment manifests.
+          description: Target namespace for OpenShift deployment.
           default: mcp-servers
         repoUrl:
           title: Repository Location
@@ -95,7 +98,7 @@ spec:
           destination: ${{ parameters.repoUrl | parseRepoUrl }}
 
     - id: publishSource
-      name: Create GitHub Repository
+      name: Create Application Repository
       action: publish:github
       input:
         repoUrl: ${{ parameters.repoUrl }}
@@ -103,8 +106,32 @@ spec:
         sourcePath: ./source
         description: ${{ parameters.description }}
 
+    - id: generateGitOps
+      name: Generate GitOps Manifests
+      action: fetch:template
+      input:
+        url: ./skeleton-gitops
+        targetPath: ./gitops
+        values:
+          name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+          apiBaseUrl: ${{ parameters.apiBaseUrl }}
+          port: ${{ parameters.port }}
+          namespace: ${{ parameters.namespace }}
+          destination: ${{ parameters.repoUrl | parseRepoUrl }}
+
+    - id: publishGitOps
+      name: Create GitOps Repository
+      action: publish:github
+      input:
+        repoUrl: github.com?owner=${{ (parameters.repoUrl | parseRepoUrl).owner }}&repo=${{ (parameters.repoUrl | parseRepoUrl).repo }}-gitops
+        defaultBranch: main
+        sourcePath: ./gitops
+        description: "GitOps manifests for ${{ parameters.name }}"
+
     - id: createWebhook
-      name: Configure CI/CD Webhook
+      name: Configure CI Webhook
       action: github:webhook
       input:
         repoUrl: ${{ parameters.repoUrl }}
@@ -114,17 +141,40 @@ spec:
           - push
         webhookSecret: pac-webhook-shared-secret
 
+    - id: createArgoApp
+      name: Create ArgoCD Application
+      action: argocd:create-resources
+      input:
+        appName: ${{ parameters.name }}
+        argoInstance: openshift-gitops
+        namespace: ${{ parameters.namespace }}
+        repoUrl: ${{ steps.publishGitOps.output.remoteUrl }}
+        path: manifests/base
+        labelValue: ${{ parameters.name }}
+
     - id: registerCatalog
-      name: Register in Backstage Catalog
+      name: Register Component in Catalog
       action: catalog:register
       input:
         repoContentsUrl: ${{ steps.publishSource.output.repoContentsUrl }}
         catalogInfoPath: /catalog-info.yaml
 
+    - id: registerGitOps
+      name: Register GitOps Resource in Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publishGitOps.output.repoContentsUrl }}
+        catalogInfoPath: /catalog-info.yaml
+
   output:
     links:
-      - title: View Repository
+      - title: Application Repository
         url: ${{ steps.publishSource.output.remoteUrl }}
+      - title: GitOps Repository
+        url: ${{ steps.publishGitOps.output.remoteUrl }}
+      - title: Open in Dev Spaces
+        icon: code
+        url: https://devspaces.apps.ocp.v7hjl.sandbox2288.opentlc.com/#${{ steps.publishSource.output.remoteUrl }}
       - title: View in Catalog
         icon: catalog
         entityRef: ${{ steps.registerCatalog.output.entityRef }}

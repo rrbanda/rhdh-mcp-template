@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ${{ values.name }}
-  namespace: ${{ values.namespace }}
   labels:
     app: ${{ values.name }}
     app.kubernetes.io/name: python
@@ -38,36 +37,3 @@ spec:
             limits:
               cpu: "1"
               memory: 512Mi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ${{ values.name }}
-  namespace: ${{ values.namespace }}
-  labels:
-    app: ${{ values.name }}
-    backstage.io/kubernetes-id: ${{ values.name }}
-spec:
-  selector:
-    app: ${{ values.name }}
-  ports:
-    - port: ${{ values.port }}
-      targetPort: ${{ values.port }}
-      protocol: TCP
----
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  name: ${{ values.name }}
-  namespace: ${{ values.namespace }}
-  labels:
-    app: ${{ values.name }}
-    backstage.io/kubernetes-id: ${{ values.name }}
-spec:
-  to:
-    kind: Service
-    name: ${{ values.name }}
-  port:
-    targetPort: ${{ values.port }}
-  tls:
-    termination: edge

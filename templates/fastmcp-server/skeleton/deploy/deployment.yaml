@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: python
     app.kubernetes.io/part-of: ${{ values.name }}
     app.openshift.io/runtime: python
-    backstage.io/kubernetes-id: ${{ values.destination.repo }}
+    backstage.io/kubernetes-id: ${{ values.name }}
   annotations:
     app.openshift.io/vcs-uri: https://github.com/${{ values.destination.owner }}/${{ values.destination.repo }}
     app.openshift.io/vcs-ref: main
@@ -21,7 +21,7 @@ spec:
     metadata:
       labels:
         app: ${{ values.name }}
-        backstage.io/kubernetes-id: ${{ values.destination.repo }}
+        backstage.io/kubernetes-id: ${{ values.name }}
     spec:
       containers:
         - name: mcp-server
@@ -46,6 +46,7 @@ metadata:
   namespace: ${{ values.namespace }}
   labels:
     app: ${{ values.name }}
+    backstage.io/kubernetes-id: ${{ values.name }}
 spec:
   selector:
     app: ${{ values.name }}
@@ -61,6 +62,7 @@ metadata:
   namespace: ${{ values.namespace }}
   labels:
     app: ${{ values.name }}
+    backstage.io/kubernetes-id: ${{ values.name }}
 spec:
   to:
     kind: Service
